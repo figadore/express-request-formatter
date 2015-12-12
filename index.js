@@ -61,6 +61,7 @@ function middleware(req, res, next) {
     if (captureRequestBody) {
       request.body = req.body;
     }
+    // Let the app do its own thing with the results
     callback(request, response);
   };
   next();
