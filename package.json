@@ -1,0 +1,28 @@
+{
+  "name": "shiny-express-formatter",
+  "version": "0.1.0",
+  "description": "request/response formatter for node.js express apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shinymayhem/express-request-formatter.git"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "formatting",
+    "logging"
+  ],
+  "author": "Reese Wilson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shinymayhem/express-request-formatter/issues"
+  },
+  "homepage": "https://github.com/shinymayhem/express-request-formatter#readme",
+  "dependencies": {
+    "uuid": "~2.0.1"
+  }
+}
