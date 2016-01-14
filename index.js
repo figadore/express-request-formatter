@@ -54,6 +54,7 @@ function middleware(req, res, next) {
     };
     var response = {
       headers: res._headers,
+      requestId: req.id,
       responseTime: responseTime,
       statusCode: res.statusCode,
       body: body
