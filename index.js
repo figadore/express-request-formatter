@@ -3,15 +3,28 @@
 
 var Uuid = require('uuid');
 
-var callback;
+var onRequestCaptured;
+var onResponseCaptured;
 var captureRequestBody;
 var captureResponseBody;
 
 // Constructor
 function formatRequests(options) {
-  callback = options.callback || function empty() {};
-  captureRequestBody = options.captureRequestBody || true;
-  captureResponseBody = options.captureResponseBody || true;
+  //deprecated, overridden by onResponseCaptured
+  var callback = options.callback || function empty() {};
+
+  onResponseCaptured = options.onResponseCaptured || callback || function empty() {};
+  onRequestCaptured = options.onRequestCaptured || function empty() {};
+
+  //default request/response body capturing to true
+  captureRequestBody = true;
+  if (options.hasOwnProperty('captureRequestBody')) {
+    captureRequestBody = options.captureRequestBody;
+  }
+  captureResponseBody = true;
+  if (options.hasOwnProperty('captureResponseBody')) {
+    captureResponseBody = options.captureResponseBody
+  }
   return middleware;
 }
 
@@ -19,11 +32,18 @@ function formatRequests(options) {
 function middleware(req, res, next) {
   // Add unique id to request
   var uuid = Uuid.v4();
+  console.log("setting request id");
   req.id = uuid;
   // Start timing request
   req.startTime = new Date();
   var oldEnd = res.end;
   // Override `end` so we can capture the response before it is sent
+  var request = {
+    id: req.id,
+    headers: req.headers,
+    method: req.method,
+    url: req.originalUrl || req.url
+  };
   res.end = function end(chunk, encoding) {
     // Set `end` back to its original value and call it
     res.end = oldEnd;
@@ -46,12 +66,6 @@ function middleware(req, res, next) {
     }
 
     var responseTime = (new Date() - req.startTime);
-    var request = {
-      id: req.id,
-      headers: req.headers,
-      method: req.method,
-      url: req.originalUrl || req.url
-    };
     var response = {
       headers: res._headers,
       requestId: req.id,
@@ -63,8 +77,10 @@ function middleware(req, res, next) {
       request.body = req.body;
     }
     // Let the app do its own thing with the results
-    callback(request, response);
+    onResponseCaptured(request, response);
   };
+  // Let the app do its own thing with the results
+  onRequestCaptured(request);
   next();
 }
 

@@ -51,8 +51,10 @@ Add middleware for formatting requests/responses
 
 Ensure any request body parsing middleware (e.g. body-parser) is set prior to using the formatting middleware
 
-### options
-* `callback`: function(requestLogObject, responseLogObject). callback to run once request and response objects have been formatted. default: do nothing
+### Options
+* `onRequestCaptured`: function(requestLogObject). callback to run once request object has been formatted. Useful for capturing request id to set bunyan child loggers. default: do nothing
+
+* `onResponseCaptured`: function(requestLogObject, responseLogObject). callback to run once request and response objects have been formatted. default: do nothing
 
 * `captureRequestBody`: boolean. whether to include the request body in the callback. default: true
 
