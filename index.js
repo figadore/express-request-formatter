@@ -32,7 +32,6 @@ function formatRequests(options) {
 function middleware(req, res, next) {
   // Add unique id to request
   var uuid = Uuid.v4();
-  console.log("setting request id");
   req.id = uuid;
   // Start timing request
   req.startTime = new Date();
