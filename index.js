@@ -23,7 +23,7 @@ function formatRequests(options) {
   }
   captureResponseBody = true;
   if (options.hasOwnProperty('captureResponseBody')) {
-    captureResponseBody = options.captureResponseBody
+    captureResponseBody = options.captureResponseBody;
   }
   return middleware;
 }
@@ -43,6 +43,9 @@ function middleware(req, res, next) {
     method: req.method,
     url: req.originalUrl || req.url
   };
+  if (captureRequestBody) {
+    request.body = req.body;
+  }
   res.end = function end(chunk, encoding) {
     // Set `end` back to its original value and call it
     res.end = oldEnd;
@@ -72,9 +75,6 @@ function middleware(req, res, next) {
       statusCode: res.statusCode,
       body: body
     };
-    if (captureRequestBody) {
-      request.body = req.body;
-    }
     // Let the app do its own thing with the results
     onResponseCaptured(request, response);
   };
