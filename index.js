@@ -43,7 +43,13 @@ function middleware(req, res, next) {
     method: req.method,
     url: req.originalUrl || req.url
   };
-  if (captureRequestBody) {
+  var captureReqBody; //boolean
+  if (typeof captureRequestBody === "function") {
+    captureReqBody = captureRequestBody(req);
+  } else {
+    captureReqBody = captureRequestBody;
+  }
+  if (captureReqBody) {
     request.body = req.body;
   }
   res.end = function end(chunk, encoding) {
@@ -53,7 +59,13 @@ function middleware(req, res, next) {
 
     // Capture response body, depending on options
     var body;
-    if (captureResponseBody) {
+    var captureResBody; //boolean
+    if (typeof captureResponseBody === "function") {
+      captureResBody = captureResponseBody(req, res);
+    } else {
+      captureResBody = captureResponseBody;
+    }
+    if (captureResBody) {
       if (chunk) {
         var isJson = (res._headers
             && res._headers['content-type']

@@ -56,10 +56,9 @@ Ensure any request body parsing middleware (e.g. body-parser) is set prior to us
 
 * `onResponseCaptured`: function(requestLogObject, responseLogObject). callback to run once request and response objects have been formatted. default: do nothing
 
-* `captureRequestBody`: boolean. whether to include the request body in the callback. default: true
+* `captureRequestBody`: boolean|function(req). whether to include the request body in the callback. default: true
 
-* `captureResponseBody`: boolean. whether to include the response body in the callback. default: true
+* `captureResponseBody`: boolean|function(req, res). whether to include the response body in the callback. default: true
 
 ### possible future work
-* let captureRequestBody and captureResponseBody be bool or functions, in case it depends on other things
 * add options to create conditions for which types of request/response bodies are captured (e.g. json only)
