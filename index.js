@@ -7,6 +7,8 @@ var onRequestCaptured;
 var onResponseCaptured;
 var captureRequestBody;
 var captureResponseBody;
+var logRequestHeaders;
+var logResponseHeaders;
 
 // Constructor
 function formatRequests(options) {
@@ -16,14 +18,24 @@ function formatRequests(options) {
   onResponseCaptured = options.onResponseCaptured || callback || function empty() {};
   onRequestCaptured = options.onRequestCaptured || function empty() {};
 
-  //default request/response body capturing to true
-  captureRequestBody = true;
+  //default request/response body capturing to false
+  captureRequestBody = false;
   if (options.hasOwnProperty('captureRequestBody')) {
     captureRequestBody = options.captureRequestBody;
   }
-  captureResponseBody = true;
+  captureResponseBody = false;
   if (options.hasOwnProperty('captureResponseBody')) {
     captureResponseBody = options.captureResponseBody;
+  }
+
+  //default request/response header logging to true
+  logRequestHeaders = true;
+  if (options.hasOwnProperty('logRequestHeaders')) {
+    logRequestHeaders = options.logRequestHeaders;
+  }
+  logResponseHeaders = true;
+  if (options.hasOwnProperty('logResponseHeaders')) {
+    logResponseHeaders = options.logResponseHeaders;
   }
   return middleware;
 }
@@ -39,10 +51,27 @@ function middleware(req, res, next) {
   // Override `end` so we can capture the response before it is sent
   var request = {
     id: req.id,
-    headers: req.headers,
     method: req.method,
-    url: req.originalUrl || req.url
+    path: req.originalUrl || req.url
   };
+  // Show request body size, if included
+  if (req.headers.hasOwnProperty("content-length")) {
+    request.size = parseInt(req.headers["content-length"], 10);
+  }
+  // Add headers (if configured to)
+  var logReqHeaders;
+  if (typeof logRequestHeaders === "function") {
+    // If option is a function, use returned object as headers to log
+    var headers = logReqHeaders(req);
+    request.headers = headers;
+  } else {
+    // If option is a bool, include all headers if true
+    logReqHeaders = logRequestHeaders;
+    if (logReqHeaders) {
+      request.headers = req.headers;
+    }
+  }
+
   var captureReqBody; //boolean
   if (typeof captureRequestBody === "function") {
     captureReqBody = captureRequestBody(req);
@@ -81,12 +110,28 @@ function middleware(req, res, next) {
 
     var responseTime = (new Date() - req.startTime);
     var response = {
-      headers: res._headers,
       requestId: req.id,
-      responseTime: responseTime,
-      statusCode: res.statusCode,
-      body: body
+      time: responseTime,
+      size: parseInt(res._headers["content-length"], 10),
+      status: res.statusCode
     };
+    // Add headers (if configured to)
+    var logReqHeaders;
+    if (typeof logRequestHeaders === "function") {
+      // If option is a function, use returned object as headers to log
+      var headers = logResponseHeaders(req, res);
+      response.headers = headers;
+    } else {
+      // If option is a bool, include all headers if true
+      logReqHeaders = logRequestHeaders;
+      if (logReqHeaders) {
+        response.headers = res._headers;
+      }
+    }
+
+    if (body) {
+      response.body = body;
+    }
     // Let the app do its own thing with the results
     onResponseCaptured(request, response);
   };
